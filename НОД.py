@@ -1,4 +1,4 @@
-__author__ = 'Вячеслав'
+﻿__author__ = 'Вячеслав'
 
 #рекурсивный НОД
 superNod = lambda a,b: b and superNod (b, a%b) or a
