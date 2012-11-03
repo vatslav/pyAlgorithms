@@ -23,6 +23,11 @@ class SumGrid(Frame):
         self.makeWidgets(numrow, numcol)           # else only usable one way
 
     def makeWidgets(self, numrow, numcol):
+        ab = '''Автор: Вацлав Довнар
+        Программа расчетывает вероятности нахождения стационарной марковской системы в заданных состояниях,
+        если известна матрица переходных вероятностей.
+        Входные параметры: число состояний N, значения переходных вероятностей.
+        Программа умеет работать с командной строкой и текстывыми файлами (сепаратор - пробел и перевод каретки)'''
         self.rows = []
 
         self.grid_ = []
@@ -55,6 +60,8 @@ class SumGrid(Frame):
         Button(self, text='Выход',  command=lambda:root.destroy()).grid(row=0, column=4)
         #Button(self, text='По Умолчанию',  command=lambda:self.setter(list((a,b,c,d,e)))).grid(row=6, column=4)
         Button(self, text='По Умолчанию',  command=lambda:self.setter(list((a,b,c,d,e)))).grid(row=0, column=4)
+        Button(self, text='О программе',  command=lambda:showinfo("О Программе", ab)).grid(row=0, column=6)
+        Button(self, text='Синтаксис КС',  command=lambda:showinfo("О Командной строке", errmsg)).grid(row=0, column=5)
 
     def report(self):
         return self.grid_
