@@ -75,6 +75,7 @@ class SumGrid(Frame):
 
     def setter(self,table,Round=1):
         #завидывает таблицу в гуи
+        if table==-1:return #если уже окно об ошибки было (не квадратная матрица)
         if not table:
             showerror('Ошибка',"Одно из полей заполнено не верно!")
             return
@@ -87,7 +88,6 @@ class SumGrid(Frame):
 ##                for x,y in zip(rcell,lcell):
 ##                    x.set(y)
     def onPrint(self):
-        print()
         print(self.rows)
         for row in self.rows:
             for col in row:
@@ -118,18 +118,12 @@ class SumGrid(Frame):
         for sum in self.sums:
             sum.config(text='?')
 
-    def onLoad(self):
-        print(len(self.rows))
-        def eraser(obj):
-            tmp = deepcopy(obj)
-            tmp = tmp.strip()
-            return tmp.split(' ')
-
-
-
-        file = askopenfilename()
+    def onLoad(self,file=None):
+        #print(len(self.rows)
+        #file=None
+        if not file:file = askopenfilename()
         #file = 'C:/Users/Vatslav/Documents/GitHub/pyAlgorithms/Marlov chains/1.txt'
-        print(file)
+        #print('file=',file)
         if file:
 ##            for row in self.rows:
 ##                for col in row: col.grid_forget()             # erase current gui хз чо он тут делает
@@ -149,11 +143,19 @@ class SumGrid(Frame):
                 for col in row: col.grid_forget()             # erase current gui
             for sum in self.sums:
                 sum.grid_forget()
+            try:
+                filelines   = open(file, 'r').readlines()         # load file data
+            except IOError:
+                showerror('Упс!..',"Файл не найден")
+                return
 
-            filelines   = open(file, 'r').readlines()         # load file data
             self.numrow = len(filelines)                      # resize to data
             self.numcol = len(filelines[0].split())
+            if self.numrow!=self.numcol:
+                showerror('Ну как так можно?',"Давайте квадартную матрицу, а не всякое там...")
+                return
             self.makeWidgets(self.numrow, self.numcol)
+
 
             for (row, line) in enumerate(filelines):          # load into gui
                 fields = line.split()
@@ -177,20 +179,20 @@ e = (0 ,0 ,0 ,0 ,1)
 if __name__ == '__main__':
     import sys
     root = Tk()
-    root.title('Summer Grid')
+    root.title('Марковские цепи v.2.0')
     errmsg = "Запуск без аргументов - по умолчанию\nЗапуск с 1 аргументов - путь к файлу с таблицей переходов\nЗапуск с 2 аргументами - количество строк и столбцов"
-    print(len(sys.argv))
-    print(sys.argv)
+
 
     #если не чего не дано или дан размер
     if len(sys.argv) == 1 or len(sys.argv)==3:
         l = len(sys.argv)
-        if l==3:#читаем размер
+        if l==3:
             try:
                 rows=int(sys.argv[1])
                 cols=int(sys.argv[2])
-            except ValueError:
+            except (ValueError,TypeError):
                 showerror('Ошибочка командной строки',errmsg)
+                root.destroy()
                 exit(1)
         else: #или задаем по умолчанию
             rows=5
@@ -206,6 +208,9 @@ if __name__ == '__main__':
         #print([[x.get() for x in elem] for elem in widget.report()])
 
     elif len(sys.argv)==2:
+        widget = SumGrid(root, numrow=5, numcol=5)
+        widget.pack()
+        widget.onLoad(sys.argv[1])
         #если дан адрес файла: выполнить то же что и при load_file и после запустить
         pass
     else: #на фоне унылое окно и это плохо, может убрать шапку и размер 0? или методм класса который сделает что надо?
@@ -215,9 +220,6 @@ if __name__ == '__main__':
         root.mainloop()
 
 
-        ф=2
-
-print(1)
 
 
 
