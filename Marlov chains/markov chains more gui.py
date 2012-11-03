@@ -4,6 +4,16 @@ from tkinter import *
 from tkinter.filedialog import askopenfilename
 from tkinter.messagebox import showerror,showinfo
 from markov_chains_more import Pj,myround
+from copy import deepcopy
+def deepworker(obj, func):
+    for x in obj:
+        for y in x:
+            y.func()
+
+def deepworker2(obj, func):
+    for x in obj:
+        for y in x:
+            y = y.func()
 
 class SumGrid(Frame):
     def __init__(self, parent=None, numrow=5, numcol=5):
@@ -36,13 +46,15 @@ class SumGrid(Frame):
             self.sums.append(lab)
 
         Button(self, text='Проверка',   command=self.onSum).grid(row=0, column=0)
-        self.calc = Button(self, text='Вычислить', command=self.onPrint)
+        #self.onPrint
+        #lambda:self.setter(Pj(5,3,self.get() ))
+        self.calc = Button(self, text='Вычислить', command=lambda:self.setter(Pj(5,3,self.get() ))  )
         self.calc.grid(row=0, column=1)
         Button(self, text='Очистить', command=self.onClear).grid(row=0, column=2)
         Button(self, text='Загрузить',  command=self.onLoad).grid(row=0, column=3)
         Button(self, text='Выход',  command=lambda:root.destroy()).grid(row=0, column=4)
         #Button(self, text='По Умолчанию',  command=lambda:self.setter(list((a,b,c,d,e)))).grid(row=6, column=4)
-        Button(self, text='По Умолчанию',  command=lambda:self.setter(list((a,b,c,d,e)))).grid(row=0, column=3)
+        Button(self, text='По Умолчанию',  command=lambda:self.setter(list((a,b,c,d,e)))).grid(row=0, column=4)
 
     def report(self):
         return self.grid_
@@ -52,7 +64,7 @@ class SumGrid(Frame):
             return [[float(x.get()) for x in elem] for elem in self.report()]
         except ValueError:
             return [[x.get() for x in elem] for elem in self.report()]
-        int(1)
+
 
     def getSafe(self):
         try:
@@ -62,6 +74,7 @@ class SumGrid(Frame):
             return None
 
     def setter(self,table,Round=1):
+        #завидывает таблицу в гуи
         if not table:
             showerror('Ошибка',"Одно из полей заполнено не верно!")
             return
@@ -92,8 +105,10 @@ class SumGrid(Frame):
                 self.sums[i].config(text=str(tots[i]))
         else:
             matrix = self.getSafe()
-            for x,i in zip(matrix,range(self.numcol)):
-                self.sums[i].config(text=str( round(sum(x),2)    ))
+            try:
+                for x,i in zip(matrix,range(self.numcol)):
+                    self.sums[i].config(text=str( round(sum(x),2)    ))
+            except TypeError:pass # нужно это исправлять рефакторингом:)
 
     def onClear(self):
         for row in self.rows:
@@ -104,25 +119,49 @@ class SumGrid(Frame):
             sum.config(text='?')
 
     def onLoad(self):
+        print(len(self.rows))
+        def eraser(obj):
+            tmp = deepcopy(obj)
+            tmp = tmp.strip()
+            return tmp.split(' ')
+
+
+
         file = askopenfilename()
+        #file = 'C:/Users/Vatslav/Documents/GitHub/pyAlgorithms/Marlov chains/1.txt'
+        print(file)
         if file:
+##            for row in self.rows:
+##                for col in row: col.grid_forget()             # erase current gui хз чо он тут делает
+##            for sum in self.sums:
+##                sum.grid_forget()
+##
+##            filelines   = open(file, 'r').readlines()         # load file data
+##
+##
+##            ptr = 0
+##            for (x,y) in zip(filelines,self.grid_):
+##                del self.grid_[ptr][len(x.strip().split(' ')):len(y)]
+##                ptr += 1
+##                for (i,j) in zip(x.strip().split(' '),y):
+##                    j.set(i)
             for row in self.rows:
                 for col in row: col.grid_forget()             # erase current gui
             for sum in self.sums:
                 sum.grid_forget()
 
             filelines   = open(file, 'r').readlines()         # load file data
-            #self.numrow = len(filelines)                      # resize to data
-            #self.numcol = len(filelines[0].split())
-            #self.makeWidgets(self.numrow, self.numcol)
-            tmp = []
+            self.numrow = len(filelines)                      # resize to data
+            self.numcol = len(filelines[0].split())
+            self.makeWidgets(self.numrow, self.numcol)
+
             for (row, line) in enumerate(filelines):          # load into gui
                 fields = line.split()
-                [tmp.append(field+'22') for field in fields ]
-            #self.setter(tmp)
-##                for col in range(self.numcol):
-##                    self.rows[row][col].delete('0', END)
-##                    self.rows[row][col].insert(END, fields[col])
+                for col in range(self.numcol):
+                    self.rows[row][col].delete('0', END)
+                    self.rows[row][col].insert(END, fields[col])
+
+
 
 def getter(spisok):
     try:
@@ -142,6 +181,7 @@ if __name__ == '__main__':
     errmsg = "Запуск без аргументов - по умолчанию\nЗапуск с 1 аргументов - путь к файлу с таблицей переходов\nЗапуск с 2 аргументами - количество строк и столбцов"
     print(len(sys.argv))
     print(sys.argv)
+
     #если не чего не дано или дан размер
     if len(sys.argv) == 1 or len(sys.argv)==3:
         l = len(sys.argv)
@@ -161,7 +201,7 @@ if __name__ == '__main__':
         if l==3:widget.onClear()  #убогая заглука, где-то в конструкторе виджета  вызывается заполнение по умолчанию
                         ##[[x.set(y) for x,y in zip(rcell,lcell)] for rcell,lcell in zip(widget.report(),list((a,b,c,d,e) ) )]
                         ##print(list(getter(widget.report() )))
-        widget.calc['command']=lambda:widget.setter(Pj(5,3,widget.get() ))
+        #widget.calc['command']=lambda:widget.setter(Pj(5,3,widget.get() ))
 
         #print([[x.get() for x in elem] for elem in widget.report()])
 
