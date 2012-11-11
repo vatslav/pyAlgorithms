@@ -125,7 +125,7 @@ class SumGrid(Frame):
         for sum in self.sums:
             sum.config(text='?')
 
-    def onLoad(self,file=None):
+    def onLoad(self,file=None,cl=None):
         #print(len(self.rows)
         #file=None
         if not file:file = askopenfilename()
@@ -153,8 +153,12 @@ class SumGrid(Frame):
             try:
                 filelines   = open(file, 'r').readlines()         # load file data
             except IOError:
-                showerror('Упс!..',"Файл не найден")
-                return
+                if not cl:
+                    showerror('Упс!..',"Файл не найден\n")
+                    return
+                else:
+                    return -1
+
 
             self.numrow = len(filelines)                      # resize to data
             self.numcol = len(filelines[0].split())
@@ -215,9 +219,17 @@ if __name__ == '__main__':
         #print([[x.get() for x in elem] for elem in widget.report()])
 
     elif len(sys.argv)==2:
-        widget = SumGrid(root, numrow=5, numcol=5)
-        widget.pack()
-        widget.onLoad(sys.argv[1])
+##        widget = SumGrid(root, numrow=5, numcol=5)
+##        widget.pack()
+        try:
+            cols = int(sys.argv[1])
+            widget = SumGrid(root, numrow=cols, numcol=cols)
+            widget.pack()
+        except ValueError:
+            widget.onLoad(sys.argv[1])
+        finally:
+            widget.pack()
+
         #если дан адрес файла: выполнить то же что и при load_file и после запустить
         pass
     else: #на фоне унылое окно и это плохо, может убрать шапку и размер 0? или методм класса который сделает что надо?
